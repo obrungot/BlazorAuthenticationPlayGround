@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,6 +17,17 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, c =>
+  {
+    c.Authority = $"https://{builder.Configuration["Auth0:Domain"]}";
+    c.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+      ValidAudience = builder.Configuration["Auth0:Audience"],
+      ValidIssuer = $"https://{builder.Configuration["Auth0:Domain"]}"
+    };
+  });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,6 +39,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseCors("Open");

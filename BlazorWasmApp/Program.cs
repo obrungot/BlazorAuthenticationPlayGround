@@ -1,5 +1,6 @@
 using BlazorWasmApp;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Net.Http.Headers;
 
@@ -9,16 +10,19 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddHttpClient("APIClient", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7226");
-    client.DefaultRequestHeaders.Clear();
-    client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
-});
+  client.BaseAddress = new Uri("https://localhost:7226");
+  client.DefaultRequestHeaders.Clear();
+  client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+}).AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
+.CreateClient("APIClient"));
 
 builder.Services.AddOidcAuthentication(options =>
 {
   builder.Configuration.Bind("Auth0", options.ProviderOptions);
   options.ProviderOptions.ResponseType = "code";
-  //options.ProviderOptions.AdditionalProviderParameters.Add("audience", builder.Configuration["Auth0:Audience"]);
+  options.ProviderOptions.AdditionalProviderParameters.Add("audience", builder.Configuration["Auth0:Audience"]);
 });
 
 await builder.Build().RunAsync();

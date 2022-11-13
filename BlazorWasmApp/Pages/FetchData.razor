@@ -1,5 +1,8 @@
 ﻿@page "/fetchdata"
+@attribute [Authorize]
+
 @using System.Text.Json;
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 @inject HttpClient Http
 
 <PageTitle>Weather forecast</PageTitle>
@@ -45,15 +48,24 @@ else
 
   protected override async Task OnInitializedAsync()
   {
-    var httpClient = httpClientFactory.CreateClient("APIClient");
-    var request = new HttpRequestMessage(HttpMethod.Get, $"/weatherforecast");
-    var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-
-    using(var responseStream = await response.Content.ReadAsStreamAsync())
+    try
     {
-      forecasts = await JsonSerializer.DeserializeAsync<WeatherForecast[]>(responseStream);
+      var httpClient = httpClientFactory.CreateClient("APIClient");
+      var request = new HttpRequestMessage(HttpMethod.Get, $"/weatherforecast");
+      var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+
+      using (var responseStream = await response.Content.ReadAsStreamAsync())
+      {
+        forecasts = await JsonSerializer.DeserializeAsync<WeatherForecast[]>(responseStream);
+      }
+      //forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
     }
-    //forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+    catch (AccessTokenNotAvailableException exception)
+    {
+      exception.Redirect();
+      throw;
+    }
+
   }
 
   public class WeatherForecast
