@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddCors(options =>
 {
-  options.AddPolicy("Open", builder => builder.WithOrigins("https://localhost:7298"));
+  options.AddPolicy("Open", builder => builder.WithOrigins("https://localhost:7298").AllowAnyMethod().AllowAnyHeader());
 });
 
 builder.Services.AddControllers()
@@ -21,7 +21,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, c =>
   {
     c.Authority = $"https://{builder.Configuration["Auth0:Domain"]}";
-    c.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    c.TokenValidationParameters = new
+    Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
       ValidAudience = builder.Configuration["Auth0:Audience"],
       ValidIssuer = $"https://{builder.Configuration["Auth0:Domain"]}"
