@@ -10,7 +10,7 @@ builder.Services.AddCors(options =>
     {
         builder
             .WithOrigins("https://localhost:7298")
-            .SetIsOriginAllowedToAllowWildcardSubdomains()
+            //.SetIsOriginAllowedToAllowWildcardSubdomains()
             .AllowAnyHeader()
             .AllowAnyMethod()
             //.AllowCredentials();
@@ -27,17 +27,14 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-  .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, c =>
-  {
-    c.Authority = $"https://{builder.Configuration["Auth0:Domain"]}";
-    c.TokenValidationParameters = new
-    Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    .AddJwtBearer(options =>
     {
-      ValidAudience = builder.Configuration["Auth0:Audience"],
-      ValidIssuer = $"https://{builder.Configuration["Auth0:Domain"]}"
-    };
-  });
+        options.Authority = $"https://{builder.Configuration["Auth0:Domain"]}";
+        options.RequireHttpsMetadata = true;
+        options.Audience = "BlazorAuthenticationPlayGround";
+    });
 
 var app = builder.Build();
 

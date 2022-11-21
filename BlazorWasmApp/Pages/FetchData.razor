@@ -3,6 +3,7 @@
 
 @using System.Text.Json;
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+@using System.Net.Http.Headers
 @inject HttpClient Http
 
 <PageTitle>Weather forecast</PageTitle>
@@ -41,32 +42,35 @@ else
 }
 
 @code {
-  [Inject]
-  public IHttpClientFactory? httpClientFactory { get; set; }
+    [Inject]
+    public IHttpClientFactory? httpClientFactory { get; set; }
 
-  private WeatherForecast[]? forecasts;
+    private WeatherForecast[]? forecasts;
 
-  protected override async Task OnInitializedAsync()
-  {
-    try
+    protected override async Task OnInitializedAsync()
     {
-      var httpClient = httpClientFactory.CreateClient("APIClient");
-      var request = new HttpRequestMessage(HttpMethod.Get, $"/weatherforecast");
-      var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        try
+        {
+                var httpClient = httpClientFactory.CreateClient("APIClient");
+                //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "Your Oauth token");
 
-      using (var responseStream = await response.Content.ReadAsStreamAsync())
-      {
-        forecasts = await JsonSerializer.DeserializeAsync<WeatherForecast[]>(responseStream);
-      }
-      //forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
-    }
-    catch (AccessTokenNotAvailableException exception)
-    {
-      exception.Redirect();
-      throw;
-    }
+                var request = new HttpRequestMessage(HttpMethod.Get, $"/weatherforecast");
+                
+                var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
-  }
+                using (var responseStream = await response.Content.ReadAsStreamAsync())
+                {
+                    forecasts = await JsonSerializer.DeserializeAsync<WeatherForecast[]>(responseStream);
+                }
+            //forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+            throw;
+        }
+
+    }
 
   public class WeatherForecast
   {
