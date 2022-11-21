@@ -5,7 +5,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddCors(options =>
 {
-  options.AddPolicy("Open", builder => builder.WithOrigins("https://localhost:7298").AllowAnyMethod().AllowAnyHeader());
+    //options.AddPolicy("Open", builder =>
+    options.AddDefaultPolicy(builder =>
+    {
+        builder
+            .WithOrigins("https://localhost:7298")
+            .SetIsOriginAllowedToAllowWildcardSubdomains()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            //.AllowCredentials();
+            .AllowAnyOrigin();
+    });
 });
 
 builder.Services.AddControllers()
@@ -40,10 +50,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors();
+//app.UseCors("Open");
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors("Open");
 
 app.MapControllers();
 
