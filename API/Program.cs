@@ -39,12 +39,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
+app.UseCors("Open");
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors("Open");
-
 app.MapControllers();
 
 app.Run();
